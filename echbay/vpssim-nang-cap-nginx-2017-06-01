@@ -1,0 +1,77 @@
+# auto install nginx page speed
+# tham khao: https://modpagespeed.com/doc/build_ngx_pagespeed_from_source
+# huong dan tai day: https://raw.githubusercontent.com/pagespeed/ngx_pagespeed/master/scripts/build_ngx_pagespeed.sh
+cd
+
+#
+nginx -v
+nginx -V
+
+#echo "-------------------------------------------------------------------------"
+#echo -n "Tiep tuc build nginx: "
+#read TiepTucBuildNginxPageSpeed
+#if [ "$TiepTucBuildNginxPageSpeed" == "y" ]; then
+#echo "Chuan bi build nginx page speed!"
+#else
+#echo "Tam dung viec build nginx page speed!"
+#exit
+#fi
+
+
+#
+if [ -f /root/ebupdate ]; then
+/root/ebupdate
+else
+sudo yum -y update
+fi
+
+#service nginx stop
+#chkconfig nginx off
+
+#rm -rf /usr/sbin/nginx
+#rm -rf /etc/nginx
+#rm -rf /etc/init.d/nginx
+
+moduledir=/usr/local/vpssim
+opensslversion=openssl-1.0.2h
+zlibversion=zlib-1.2.8
+
+# get new version: http://nginx.org/en/download.html
+#Nginx_VERSION=1.11.4
+#Nginx_VERSION=1.12.0
+Nginx_VERSION="latest"
+
+# get new version: https://modpagespeed.com/doc/release_notes
+#NPS_VERSION=1.11.33.0
+NPS_VERSION="latest-stable"
+
+
+#
+sudo yum -y install gcc-c++ pcre-devel zlib-devel make unzip
+sudo rpm --import https://linux.web.cern.ch/linux/scientific6/docs/repository/cern/slc6X/i386/RPM-GPG-KEY-cern
+sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo https://linux.web.cern.ch/linux/scientific6/docs/repository/cern/devtoolset/slc6-devtoolset.repo
+sudo yum -y install devtoolset-2-gcc-c++ devtoolset-2-binutils
+
+#
+PS_NGX_EXTRA_FLAGS="--with-cc=/opt/rh/devtoolset-2/root/usr/bin/gcc"
+
+
+bash <(curl -f -L -sS https://ngxpagespeed.com/install) \
+--ngx-pagespeed-version $NPS_VERSION \
+--nginx-version $Nginx_VERSION \
+--assume-yes \
+--additional-nginx-configure-arguments '--prefix=/usr/share/nginx --sbin-path=/usr/sbin/nginx --group=nginx --user=nginx --pid-path=/var/run/nginx.pid --conf-path=/etc/nginx/nginx.conf --with-http_v2_module --with-http_ssl_module --with-ipv6 --with-http_flv_module --with-http_mp4_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --with-http_sub_module --with-http_xslt_module --with-http_addition_module --with-http_dav_module --with-http_geoip_module --with-http_image_filter_module --with-mail --with-mail_ssl_module --with-http_gunzip_module --with-file-aio --with-pcre --with-google_perftools_module --with-debug --with-openssl-opt="enable-tlsext" --with-http_gzip_static_module --with-http_realip_module --with-http_stub_status_module'
+#--dynamic-module '' \
+#--help
+
+# tao thu muc lua cache cho pagespeed
+mkdir -p /var/cache/ngx_pagespeed
+chown nginx:nginx /var/cache/ngx_pagespeed
+mkdir -p /var/ngx_pagespeed_cache
+chown nginx:nginx /var/ngx_pagespeed_cache
+
+service nginx restart
+#chkconfig nginx on
+
+nginx -v
+nginx -V

@@ -316,48 +316,7 @@ make install
 #rm -rf /tmp/nginx.conf
 fi
 }
-
-
-
-change_nginx_run_http2_quick_pagespeed () {
-# auto install nginx page speed
-# tham khao: https://modpagespeed.com/doc/build_ngx_pagespeed_from_source
-# huong dan tai day: https://raw.githubusercontent.com/pagespeed/ngx_pagespeed/master/scripts/build_ngx_pagespeed.sh
-cd
-
-#service nginx stop
-#chkconfig nginx off
-
-#rm -rf /usr/sbin/nginx
-#rm -rf /etc/nginx
-#rm -rf /etc/init.d/nginx
-
-moduledir=/usr/local/vpssim
-opensslversion=openssl-1.0.2h
-zlibversion=zlib-1.2.8
-
-# get new version: http://nginx.org/en/download.html
-#Nginx_VERSION=1.11.4
-Nginx_VERSION=1.12.0
-#Nginx_VERSION="latest"
-
-# get new version: https://modpagespeed.com/doc/release_notes
-#NPS_VERSION=1.11.33.0
-NPS_VERSION="latest-stable"
-
-bash <(curl -f -L -sS https://ngxpagespeed.com/install) \
---ngx-pagespeed-version $NPS_VERSION \
---nginx-version $Nginx_VERSION \
---assume-yes y \
---additional-nginx-configure-arguments '--prefix=/usr/share/nginx --sbin-path=/usr/sbin/nginx --group=nginx --user=nginx --pid-path=/var/run/nginx.pid --conf-path=/etc/nginx/nginx.conf --with-http_v2_module --with-http_ssl_module --with-ipv6 --with-http_flv_module --with-http_mp4_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --with-http_sub_module --with-http_xslt_module --with-http_addition_module --with-http_dav_module --with-http_geoip_module --with-http_image_filter_module --with-mail --with-mail_ssl_module --with-http_gunzip_module --with-file-aio --with-pcre --with-google_perftools_module --with-debug --with-openssl-opt="enable-tlsext" --with-http_gzip_static_module --with-http_realip_module --with-http_stub_status_module'
-#--dynamic-module '' \
-#--help
-
-#service nginx start
-#chkconfig nginx on
-}
-
-
+	
 check_spdy_http2 () {
 	if [ ! "$(grep spdy /etc/nginx/conf.d/*.conf)" == "" ]; then 
 	sed -i 's/spdy/http2/g' /etc/nginx/conf.d/*.conf
@@ -448,7 +407,6 @@ echo "Please wait ..."
 sleep 3
 download_module_nginx
 change_nginx_run_http2_no_pagespeed
-#change_nginx_run_http2_quick_pagespeed
 check_spdy_http2
 sed -i 's/.*ngx_pagespeed.conf.*/#include \/etc\/nginx\/ngx_pagespeed.conf; (Nginx Pagespeed complete removed from VPSSIM 3.3.0 - Do not uncomment this line )/g' /etc/nginx/conf.d/*.conf
 if [ -f /etc/nginx/ngx_pagespeed.conf ]; then
